@@ -1,7 +1,7 @@
 
 # Video Recommendation System
 
-A **Video Recommendation System** built using the **Surprise** library and **Streamlit** for interactive deployment. The system provides personalized video recommendations based on user viewing history. It leverages collaborative filtering using the Singular Value Decomposition (SVD) algorithm.
+A **Video Recommendation System** built using the **Surprise** library, **Streamlit** for interactive deployment and **flask** for api implementation. The system provides personalized video recommendations based on user viewing history. It leverages collaborative filtering using the Singular Value Decomposition (SVD) algorithm.
 
 ## Features:
 - **User-Based Recommendations**: Suggests posts that a user is likely to interact with based on their past interactions and similarities with other users.

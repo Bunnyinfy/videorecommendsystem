@@ -252,8 +252,6 @@ This documentation provides a clear explanation of the approach, model architect
   
 These endpoints can be used for delivering personalized content recommendations to users in different scenarios.
 
-## License
 
-This project is licensed under the MIT License.
 
 ---

@@ -1,0 +1,84 @@
+import streamlit as st
+import pandas as pd
+from surprise import Dataset, Reader, SVD, accuracy
+from surprise.model_selection import train_test_split
+import pickle
+
+
+# Function to generate recommendations
+def get_recommendations(model, df, user_id, top_n=5):
+    all_posts = df["post_id"].unique()  # Get all post IDs from the data
+    unseen_posts = [
+        post
+        for post in all_posts
+        if post not in df[df["user_id"] == user_id]["post_id"].values
+    ]
+
+    # Predict ratings for the unseen posts
+    predictions = []
+    for post in unseen_posts:
+        pred = model.predict(user_id, post)
+        predictions.append((post, pred.est))
+
+    # Sort predictions by estimated rating and return top N posts
+    predictions.sort(key=lambda x: x[1], reverse=True)
+    top_recommendations = predictions[:top_n]
+
+    return top_recommendations
+
+
+# Streamlit UI
+def main():
+    st.title("Video Recommendation System")
+
+    # Upload CSV file for data
+    uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
+
+    if uploaded_file is not None:
+        # Load data
+        df = pd.read_csv(uploaded_file)
+        st.write("Data Preview:", df.head())
+
+        # Ensure required columns are in the data
+        if all(col in df.columns for col in ["user_id", "post_id", "viewed"]):
+            # Prepare the data for Surprise
+            reader = Reader(rating_scale=(0, 1))  # Assuming binary ratings (0 or 1)
+            data = Dataset.load_from_df(df[["user_id", "post_id", "viewed"]], reader)
+
+            # Split the data into training and test sets
+            trainset, testset = train_test_split(data, test_size=0.2)
+
+            # Load or train model
+            if "model.pkl" in uploaded_file.name:
+                # Load the saved model
+                with open("model.pkl", "rb") as f:
+                    model = pickle.load(f)
+                st.write("Model loaded from file.")
+            else:
+                # Train a new model (using SVD for example)
+                model = SVD()
+                model.fit(trainset)
+                with open("model.pkl", "wb") as f:
+                    pickle.dump(model, f)
+                st.write("Model trained and saved.")
+
+            # Input User ID for recommendations
+            user_id = st.number_input(
+                "Enter User ID to get recommendations:", min_value=1, step=1
+            )
+
+            if st.button("Get Recommendations"):
+                top_recommendations = get_recommendations(model, df, user_id, top_n=5)
+
+                # Display recommendations
+                st.write(f"Top 5 recommendations for User {user_id}:")
+                for i, (post, rating) in enumerate(top_recommendations, 1):
+                    st.write(f"{i}. Post ID: {post}, Predicted Rating: {rating:.2f}")
+        else:
+            st.error(
+                "CSV file must contain 'user_id', 'post_id', and 'viewed' columns."
+            )
+
+
+if __name__ == "__main__":
+    main()

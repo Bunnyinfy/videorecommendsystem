@@ -1,0 +1,5 @@
+username,user_id,post_id,category_id,mood
+johndoe,1,101,1,happy
+johndoe,1,102,1,sad
+janedoe,2,103,2,happy
+janedoe,2,104,2,sad
